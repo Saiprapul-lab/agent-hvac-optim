@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CtaSection = () => {
   return (
@@ -14,19 +15,23 @@ const CtaSection = () => {
             Join forward-thinking facility managers who are leveraging AI to reduce energy costs, improve occupant comfort, and streamline HVAC management.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button 
-              className="bg-white hover:bg-gray-100 text-tab-blue text-lg px-8 py-6 h-auto"
-              size="lg"
-            >
-              Request Demo
-            </Button>
-            <Button 
-              className="bg-transparent hover:bg-white/10 border border-white text-white text-lg px-8 py-6 h-auto"
-              variant="outline"
-              size="lg"
-            >
-              Contact Sales <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to="/signup">
+              <Button 
+                className="bg-white hover:bg-gray-100 text-tab-blue text-lg px-8 py-6 h-auto"
+                size="lg"
+              >
+                Get Started
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button 
+                className="bg-transparent hover:bg-white/10 border border-white text-white text-lg px-8 py-6 h-auto"
+                variant="outline"
+                size="lg"
+              >
+                Login <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
