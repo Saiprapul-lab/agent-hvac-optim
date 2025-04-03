@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -22,19 +23,23 @@ const HeroSection = () => {
             The TAB System transforms HVAC testing, adjusting, and balancing with intelligent agents that automate workflows, optimize performance, and predict maintenance needs.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button 
-              className="bg-tab-blue hover:bg-tab-blue/90 text-white text-lg px-8 py-6 h-auto"
-              size="lg"
-            >
-              Request Demo
-            </Button>
-            <Button 
-              className="bg-white border border-tab-blue/20 hover:bg-gray-50 text-tab-blue text-lg px-8 py-6 h-auto"
-              variant="outline"
-              size="lg"
-            >
-              Learn More <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link to="/request-demo">
+              <Button 
+                className="bg-tab-blue hover:bg-tab-blue/90 text-white text-lg px-8 py-6 h-auto"
+                size="lg"
+              >
+                Request Demo
+              </Button>
+            </Link>
+            <Link to="#features">
+              <Button 
+                className="bg-white border border-tab-blue/20 hover:bg-gray-50 text-tab-blue text-lg px-8 py-6 h-auto"
+                variant="outline"
+                size="lg"
+              >
+                Learn More <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

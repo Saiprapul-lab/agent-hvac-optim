@@ -1,11 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
 import EngineerDashboard from "@/components/dashboard/EngineerDashboard";
 import TechnicianDashboard from "@/components/dashboard/TechnicianDashboard";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 
 // Mock authentication - In a real app, you would use a proper auth system
@@ -40,8 +39,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <DashboardNavbar user={user} onLogout={handleLogout} />
       <main className="flex-1 pt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
@@ -59,7 +58,6 @@ const Dashboard = () => {
           {user.role === "Technician" && <TechnicianDashboard user={user} />}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
