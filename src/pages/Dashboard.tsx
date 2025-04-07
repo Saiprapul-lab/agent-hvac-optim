@@ -5,6 +5,7 @@ import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
 import EngineerDashboard from "@/components/dashboard/EngineerDashboard";
 import TechnicianDashboard from "@/components/dashboard/TechnicianDashboard";
+import { toast } from "sonner";
 
 // Mock authentication - In a real app, you would use a proper auth system
 const mockAuthCheck = () => {
@@ -22,10 +23,17 @@ const Dashboard = () => {
     const loggedInUser = mockAuthCheck();
     setUser(loggedInUser);
     setLoading(false);
+    
+    if (loggedInUser) {
+      toast.success(`Welcome back, ${loggedInUser.name}!`, {
+        description: `You've logged in as a ${loggedInUser.role}.`,
+      });
+    }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("tabSystemUser");
+    toast.info("Successfully logged out");
     navigate("/login");
   };
 
