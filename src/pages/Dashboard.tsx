@@ -46,7 +46,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background dark">
+    <div className="min-h-screen flex flex-col bg-background">
       <DashboardNavbar user={user} onLogout={handleLogout} />
       <main className="flex-1 pt-16">
         <div className="container mx-auto px-4 py-8">
