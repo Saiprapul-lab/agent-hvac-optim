@@ -1,44 +1,64 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  FileUp, 
-  Users, 
-  FolderPlus, 
-  BarChart4, 
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sparkles,
+  FolderKanban,
+  Users,
   Layers,
+  TrendingUp,
+  Plus,
+  FileUp,
+  BarChart3,
   ChevronRight,
-  PlusCircle,
-  FileText,
+  Search,
+  Bell,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Zap,
   Settings,
-  AlertTriangle
+  PanelRightOpen,
+  PanelRightClose,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { toast } from "sonner";
+import CommandPalette from "./CommandPalette";
+import AIAgentSidebar from "./AIAgentSidebar";
+import ActivityFeed from "./ActivityFeed";
+import MetricCard from "./MetricCard";
+import ActionCard from "./ActionCard";
+import StatusIndicator from "./StatusIndicator";
 
-// Mock data for the dashboard
-const mockProjects = [
-  { id: 1, name: "Downtown Office Tower", status: "In Progress", units: 42, completion: "65%" },
-  { id: 2, name: "Westside Medical Center", status: "Pending", units: 86, completion: "0%" },
-  { id: 3, name: "North Campus Expansion", status: "Completed", units: 38, completion: "100%" },
-  { id: 4, name: "City Center Hotel", status: "In Progress", units: 124, completion: "28%" },
+// Mock data
+const attentionItems = [
+  {
+    id: "1",
+    type: "urgent",
+    title: "3 units overdue for testing",
+    project: "Downtown Office Tower",
+    action: "view-overdue",
+  },
+  {
+    id: "2",
+    type: "warning",
+    title: "License expires in 15 days",
+    project: "System",
+    action: "renew-license",
+  },
+  {
+    id: "3",
+    type: "info",
+    title: "Weekly report ready for review",
+    project: "All Projects",
+    action: "view-report",
+  },
 ];
 
-const mockTeamMembers = [
-  { id: 1, name: "Sarah Johnson", role: "Engineer", assignedProjects: 3 },
-  { id: 2, name: "Michael Chen", role: "Technician", assignedProjects: 2 },
-  { id: 3, name: "Robert Davis", role: "Engineer", assignedProjects: 1 },
-  { id: 4, name: "Emily Rodriguez", role: "Technician", assignedProjects: 4 },
+const recentProjects = [
+  { id: 1, name: "Downtown Office Tower", status: "active", progress: 65, units: 42 },
+  { id: 2, name: "Westside Medical Center", status: "pending", progress: 0, units: 86 },
+  { id: 3, name: "City Center Hotel", status: "active", progress: 28, units: 124 },
+  { id: 4, name: "North Campus Expansion", status: "completed", progress: 100, units: 38 },
 ];
 
 type AdminDashboardProps = {
@@ -46,435 +66,273 @@ type AdminDashboardProps = {
 };
 
 const AdminDashboard = ({ user }: AdminDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [aiSidebarOpen, setAiSidebarOpen] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const handleCreateProject = () => {
-    setShowProjectForm(true);
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleCommandAction = (action: string) => {
+    switch (action) {
+      case "new-project":
+        toast.success("Opening new project form");
+        break;
+      case "ai-assistant":
+        setAiSidebarOpen(true);
+        break;
+      case "quick-test":
+        toast.info("Quick test mode activated");
+        break;
+      default:
+        toast.info(`Action: ${action}`);
+    }
   };
 
-  const handleSubmitProject = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Project created successfully", {
-      description: "New project has been added to your dashboard"
-    });
-    setShowProjectForm(false);
+  const handleAttentionItem = (action: string) => {
+    toast.info(`Navigating to: ${action}`);
   };
 
-  const handleCardAction = (action: string) => {
-    switch(action) {
-      case "projects":
-        setActiveTab("projects");
-        toast.info("Viewing all projects");
-        break;
-      case "team":
-        setActiveTab("team");
-        toast.info("Viewing team members");
-        break;
-      case "units":
-        toast.info("Unit management", { 
-          description: "View all tracked units across projects" 
-        });
-        break;
-      case "completion":
-        toast.info("Performance overview", { 
-          description: "View detailed completion metrics" 
-        });
-        break;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-success";
+      case "pending":
+        return "bg-warning";
+      case "completed":
+        return "bg-primary";
+      default:
+        return "bg-muted";
     }
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:border-tab-blue hover:shadow-md transition-all cursor-pointer" 
-              onClick={() => handleCardAction("projects")}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <Layers className="h-4 w-4 text-tab-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
-          </CardContent>
-          <CardFooter className="pt-0 text-xs text-tab-blue flex justify-end items-center">
-            <span>Manage Projects</span>
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </CardFooter>
-        </Card>
-        <Card className="hover:border-tab-blue hover:shadow-md transition-all cursor-pointer"
-              onClick={() => handleCardAction("team")}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Team Members</CardTitle>
-            <Users className="h-4 w-4 text-tab-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">8 active assignments</p>
-          </CardContent>
-          <CardFooter className="pt-0 text-xs text-tab-blue flex justify-end items-center">
-            <span>View Team</span>
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </CardFooter>
-        </Card>
-        <Card className="hover:border-tab-blue hover:shadow-md transition-all cursor-pointer"
-              onClick={() => handleCardAction("units")}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Units Tracked</CardTitle>
-            <Layers className="h-4 w-4 text-tab-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">290</div>
-            <p className="text-xs text-muted-foreground">148 tested, 142 pending</p>
-          </CardContent>
-          <CardFooter className="pt-0 text-xs text-tab-blue flex justify-end items-center">
-            <span>View All Units</span>
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </CardFooter>
-        </Card>
-        <Card className="hover:border-tab-blue hover:shadow-md transition-all cursor-pointer bg-gradient-to-br from-blue-50 to-indigo-50"
-              onClick={() => handleCardAction("completion")}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-            <BarChart4 className="h-4 w-4 text-tab-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">48.3%</div>
-            <p className="text-xs text-muted-foreground">+5.2% from last week</p>
-          </CardContent>
-          <CardFooter className="pt-0 text-xs text-tab-blue flex justify-end items-center">
-            <span>View Analytics</span>
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </CardFooter>
-        </Card>
-      </div>
+    <div className="flex h-[calc(100vh-4rem)] bg-background dark">
+      {/* Command Palette */}
+      <CommandPalette onAction={handleCommandAction} />
 
-      {showProjectForm ? (
-        <Card>
-          <CardHeader className="bg-gray-50 border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle>Create New Project</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => setShowProjectForm(false)}>Cancel</Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <form onSubmit={handleSubmitProject}>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium block mb-1">Project Name</label>
-                  <input type="text" className="w-full p-2 border rounded-md" placeholder="Enter project name" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Client</label>
-                  <input type="text" className="w-full p-2 border rounded-md" placeholder="Enter client name" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <div className="h-12 border-b border-border flex items-center justify-between px-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-2 text-muted-foreground hover:text-foreground"
+              onClick={() => toast.info("Search activated")}
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span className="text-xs">Search</span>
+              <span className="kbd">⌘K</span>
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setAiSidebarOpen(!aiSidebarOpen)}
+            >
+              {aiSidebarOpen ? (
+                <PanelRightClose className="h-4 w-4" />
+              ) : (
+                <PanelRightOpen className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Dashboard Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Area */}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full">
+              <div className="p-6 space-y-6">
+                {/* Greeting & Status */}
+                <div className="flex items-start justify-between">
                   <div>
-                    <label className="text-sm font-medium block mb-1">Start Date</label>
-                    <input type="date" className="w-full p-2 border rounded-md" />
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                      Good {currentTime.getHours() < 12 ? "morning" : currentTime.getHours() < 17 ? "afternoon" : "evening"}, {user?.name?.split(" ")[0] || "Admin"}
+                    </h1>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Here's what needs your attention today
+                    </p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Expected Completion</label>
-                    <input type="date" className="w-full p-2 border rounded-md" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <StatusIndicator status="online" size="sm" />
+                    <span>All systems operational</span>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Project Description</label>
-                  <textarea className="w-full p-2 border rounded-md" rows={3} placeholder="Brief project description"></textarea>
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">Assign Team Members</label>
-                  <select className="w-full p-2 border rounded-md" multiple>
-                    {mockTeamMembers.map(member => (
-                      <option key={member.id} value={member.id}>{member.name} ({member.role})</option>
+
+                {/* Attention Required - AI-Surfaced */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Needs Attention</span>
+                    <span className="text-xs text-muted-foreground">• AI-prioritized</span>
+                  </div>
+                  <div className="grid gap-2">
+                    {attentionItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleAttentionItem(item.action)}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:bg-secondary/50 hover:border-primary/20 transition-all group text-left w-full"
+                      >
+                        {item.type === "urgent" ? (
+                          <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                        ) : item.type === "warning" ? (
+                          <Clock className="h-4 w-4 text-warning shrink-0" />
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">{item.project}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
                     ))}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple members</p>
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setShowProjectForm(false)}>Cancel</Button>
-                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Create Project</Button>
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <MetricCard
+                    title="Active Projects"
+                    value={4}
+                    change="+2 this month"
+                    changeType="positive"
+                    icon={FolderKanban}
+                    onClick={() => toast.info("Viewing projects")}
+                  />
+                  <MetricCard
+                    title="Team Members"
+                    value={12}
+                    change="8 active"
+                    changeType="neutral"
+                    icon={Users}
+                    onClick={() => toast.info("Viewing team")}
+                  />
+                  <MetricCard
+                    title="Units Tracked"
+                    value={290}
+                    change="148 tested"
+                    changeType="neutral"
+                    icon={Layers}
+                    onClick={() => toast.info("Viewing units")}
+                  />
+                  <MetricCard
+                    title="Completion Rate"
+                    value="48.3%"
+                    change="+5.2%"
+                    changeType="positive"
+                    icon={TrendingUp}
+                    onClick={() => toast.info("Viewing analytics")}
+                    glowing
+                  />
+                </div>
+
+                {/* Quick Actions */}
+                <div className="space-y-3">
+                  <span className="text-sm font-medium">Quick Actions</span>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <ActionCard
+                      title="New Project"
+                      description="Start a new TAB project"
+                      icon={Plus}
+                      variant="primary"
+                      shortcut="⌘N"
+                      onClick={() => toast.success("Opening new project form")}
+                    />
+                    <ActionCard
+                      title="Import Units"
+                      description="Bulk add from spreadsheet"
+                      icon={FileUp}
+                      variant="default"
+                      onClick={() => toast.info("Import dialog opening")}
+                    />
+                    <ActionCard
+                      title="Quick Test"
+                      description="Start a rapid test session"
+                      icon={Zap}
+                      variant="success"
+                      shortcut="⌘T"
+                      onClick={() => toast.info("Quick test mode")}
+                    />
+                    <ActionCard
+                      title="Generate Report"
+                      description="AI-powered analytics"
+                      icon={BarChart3}
+                      variant="default"
+                      onClick={() => toast.info("Generating report")}
+                    />
+                  </div>
+                </div>
+
+                {/* Projects List */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Recent Projects</span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">
+                      View all
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {recentProjects.map((project) => (
+                      <button
+                        key={project.id}
+                        onClick={() => toast.info(`Opening ${project.name}`)}
+                        className="flex items-center gap-4 p-3 rounded-lg bg-card border border-border hover:bg-secondary/50 hover:border-primary/20 transition-all group w-full text-left"
+                      >
+                        <div className={`h-2 w-2 rounded-full ${getStatusColor(project.status)}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{project.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {project.units} units • {project.progress}% complete
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {/* Progress bar */}
+                          <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden hidden md:block">
+                            <div
+                              className="h-full bg-primary transition-all"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground w-10 text-right">
+                            {project.progress}%
+                          </span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      ) : (
-        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Projects</CardTitle>
-                  <CardDescription>
-                    Overview of your active and recent projects
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Project</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Completion</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mockProjects.slice(0, 3).map((project) => (
-                        <TableRow key={project.id} className="hover:bg-gray-50 cursor-pointer" 
-                                  onClick={() => toast.info(`Project details: ${project.name}`, 
-                                  { description: `Status: ${project.status}, Units: ${project.units}` })}>
-                          <TableCell className="font-medium">{project.name}</TableCell>
-                          <TableCell>
-                            <span 
-                              className={`inline-block px-2 py-1 text-xs rounded-full ${
-                                project.status === "Completed" 
-                                  ? "bg-green-100 text-green-800" 
-                                  : project.status === "In Progress" 
-                                  ? "bg-blue-100 text-blue-800" 
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {project.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>{project.completion}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" onClick={() => setActiveTab("projects")}>
-                    View All Projects
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>
-                    Common administrative tasks
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button className="w-full justify-start h-auto p-4 flex flex-col items-start text-left bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200 text-blue-700"
-                    onClick={handleCreateProject}>
-                    <FolderPlus className="mb-2 h-5 w-5" />
-                    <div>
-                      <div className="font-medium text-sm">Create Project</div>
-                      <div className="text-xs text-blue-600 mt-1">Set up a new TAB project</div>
-                    </div>
-                  </Button>
-                  
-                  <Button className="w-full justify-start h-auto p-4 flex flex-col items-start text-left bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-200 text-green-700"
-                    onClick={() => toast.success("Import dialog opened", { description: "Upload your units spreadsheet to begin" })}>
-                    <FileUp className="mb-2 h-5 w-5" />
-                    <div>
-                      <div className="font-medium text-sm">Import Units</div>
-                      <div className="text-xs text-green-600 mt-1">Bulk add from spreadsheet</div>
-                    </div>
-                  </Button>
-                  
-                  <Button className="w-full justify-start h-auto p-4 flex flex-col items-start text-left bg-gradient-to-br from-purple-50 to-fuchsia-50 hover:from-purple-100 hover:to-fuchsia-100 border border-purple-200 text-purple-700"
-                    onClick={() => setActiveTab("team")}>
-                    <Users className="mb-2 h-5 w-5" />
-                    <div>
-                      <div className="font-medium text-sm">Manage Team</div>
-                      <div className="text-xs text-purple-600 mt-1">Add or edit team members</div>
-                    </div>
-                  </Button>
-                  
-                  <Button className="w-full justify-start h-auto p-4 flex flex-col items-start text-left bg-gradient-to-br from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border border-amber-200 text-amber-700"
-                    onClick={() => toast.info("Reports generator opened", { description: "Create custom project reports" })}>
-                    <BarChart4 className="mb-2 h-5 w-5" />
-                    <div>
-                      <div className="font-medium text-sm">Reports</div>
-                      <div className="text-xs text-amber-600 mt-1">Generate project analytics</div>
-                    </div>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>System Notifications</CardTitle>
-                  <CardDescription>Recent alerts and updates</CardDescription>
-                </div>
-                <Button variant="outline" size="sm">
-                  Mark All as Read
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-yellow-800">License Renewal</h4>
-                      <p className="text-xs text-yellow-700 mt-1">Your TAB system license will expire in 15 days. Please renew to avoid service interruption.</p>
-                      <div className="flex gap-2 mt-2">
-                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs">
-                          Renew Now
-                        </Button>
-                        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                          Dismiss
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                    <FileText className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-blue-800">Report Ready</h4>
-                      <p className="text-xs text-blue-700 mt-1">Monthly progress report for "Downtown Office Tower" has been generated.</p>
-                      <div className="flex gap-2 mt-2">
-                        <Button size="sm" variant="outline" className="h-7 px-2 text-xs">
-                          View Report
-                        </Button>
-                        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                          Dismiss
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="projects" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>All Projects</CardTitle>
-                  <CardDescription>
-                    Manage your TAB projects
-                  </CardDescription>
-                </div>
-                <Button onClick={handleCreateProject}>
-                  <FolderPlus className="mr-2 h-4 w-4" />
-                  New Project
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Project Name</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Units</TableHead>
-                      <TableHead>Completion</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockProjects.map((project) => (
-                      <TableRow key={project.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{project.name}</TableCell>
-                        <TableCell>
-                          <span 
-                            className={`inline-block px-2 py-1 text-xs rounded-full ${
-                              project.status === "Completed" 
-                                ? "bg-green-100 text-green-800" 
-                                : project.status === "In Progress" 
-                                ? "bg-blue-100 text-blue-800" 
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {project.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>{project.units}</TableCell>
-                        <TableCell>{project.completion}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="h-8 px-2 text-xs"
-                                    onClick={() => toast.info(`View ${project.name}`, { description: "Opening project details" })}>
-                              View
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-8 px-2 text-xs"
-                                    onClick={() => toast.info(`Edit ${project.name}`, { description: "Opening project editor" })}>
-                              Edit
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="team" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Team Members</CardTitle>
-                  <CardDescription>
-                    Manage your team and assignments
-                  </CardDescription>
-                </div>
-                <Button onClick={() => toast.success("Add member dialog opened", { description: "Create a new team member account" })}>
-                  <Users className="mr-2 h-4 w-4" />
-                  Add Member
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Assigned Projects</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockTeamMembers.map((member) => (
-                      <TableRow key={member.id} className="hover:bg-gray-50">
-                        <TableCell className="font-medium">{member.name}</TableCell>
-                        <TableCell>
-                          <span 
-                            className={`inline-block px-2 py-1 text-xs rounded-full ${
-                              member.role === "Engineer" 
-                                ? "bg-purple-100 text-purple-800" 
-                                : "bg-teal-100 text-teal-800"
-                            }`}
-                          >
-                            {member.role}
-                          </span>
-                        </TableCell>
-                        <TableCell>{member.assignedProjects}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="h-8 px-2 text-xs"
-                                    onClick={() => toast.info(`${member.name}'s profile`, { description: "View team member details" })}>
-                              Profile
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-8 px-2 text-xs"
-                                    onClick={() => toast.info(`Assign ${member.name}`, { description: "Manage project assignments" })}>
-                              Assign
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      )}
+            </ScrollArea>
+          </div>
+
+          {/* Activity Feed - Right Panel */}
+          <div className="w-72 border-l border-border hidden lg:block">
+            <ActivityFeed />
+          </div>
+        </div>
+      </div>
+
+      {/* AI Agent Sidebar */}
+      <AIAgentSidebar
+        isOpen={aiSidebarOpen}
+        onClose={() => setAiSidebarOpen(false)}
+        onAction={handleCommandAction}
+      />
     </div>
   );
 };
